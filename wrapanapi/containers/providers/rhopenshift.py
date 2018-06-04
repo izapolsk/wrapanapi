@@ -213,10 +213,20 @@ class Openshift(Kubernetes):
             entities.append(entity)
         return entities
 
-    def list_template(self, namespace=None):
-        """Returns list of templates"""
+    def list_template(self, namespace=None, filter=None):
+        """Returns list of templates
+
+        Args:
+            namespace: (str) openshift project name
+            filter: function which accepts template name and returns True if template suits and
+                    False otherwise
+        Returns: list of template names
+        """
         namespace = namespace if namespace else self.default_namespace
-        return [t.metadata.name for t in self.o_api.list_namespaced_template(namespace).items]
+        templates = [t.metadata.name for t in self.o_api.list_namespaced_template(namespace).items]
+        if filter:
+            templates = [t for t in templates if filter(t)]
+        return templates
 
     def list_docker_image(self):
         """Returns list of images (Docker registry only)"""
